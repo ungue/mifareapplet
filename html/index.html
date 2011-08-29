@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testing Mifare</title>
+    <script src="/javascripts/jquery.js" type="text/javascript"></script>
+    <script src="http://www.java.com/js/deployJava.js"></script>
+    <script language="javascript">
+
+      var attributes = { code:'MifareApplet',  width:1, height:1, id:'app'} ; 
+      var parameters = {jnlp_href: '/applets/appletsmartcard.jnlp'} ; 
+      deployJava.runApplet(attributes, parameters, '1.6'); 
+
+      $(function() {
+        app = $('#app')[0];
+
+        app.setTerminal(jQuery.parseJSON(app.terminals())[1]);
+        app.setProtocol("T=1");
+
+        app.beginTransaction();
+        
+        r = jQuery.parseJSON(app.load_key([0x55,0x55,0x55,0x55,0x55,0x55],app.KEY_B));
+        r = jQuery.parseJSON(app.auth(0,app.KEY_B));
+        r = jQuery.parseJSON(app.read(0));
+
+        app.endTransaction();
+      });
+
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

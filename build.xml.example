@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mifare-applet" basedir="." default="compile">
+  <property name="app.name"           value="mifareapplet"/>
+  <property name="src.dir"            value="src"/>
+  <property name="build.dir"          value="build"/>
+  <property name="jar.dir"            value="${build.dir}/jar"/>
+  <property name="classes.dir"        value="${build.dir}/classes"/>
+  <property name="html.dir"           value="html"/>
+  <property name="version.num"        value="1.00"/>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}">
+      <classpath>
+        <fileset dir="lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+  
+  <target name="jar" depends="compile">
+    <buildnumber file="BUILD"/>
+
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/${app.name}.jar" basedir="${classes.dir}" update="true">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Implementation-Version" value="${version.num}-b${build.number}"/>         
+      </manifest>
+    </jar>
+    <signjar jar="${jar.dir}/${app.name}.jar" alias="thealias" storepass="thepass"/>
+  </target>
+</project>
+

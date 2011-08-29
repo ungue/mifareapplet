@@ -1,0 +1,15 @@
+# Ignore custom config
+build.xml
+
+# Ignore binaries
+lib/
+build/
+
+# Ignore temp dir
+tmp/
+
+# Ignore BUILD file
+BUILD
+
+# For vim:
+*.swp

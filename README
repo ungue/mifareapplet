@@ -1,0 +1,42 @@
+= Mifare Applet
+
+This applet allow you to use mifare cards from Javascript.
+For now, the applet has been tested with SCM SDI010 card reader.
+
+== Functions
+
+It only has six simple autoexplanatory functions:
+
+* load_key
+* auth
+* read
+* write
+* beginTransaction
+* endTransaction
+
+== Example of use
+
+Here we can see how a card block is readed from a web page by mean of Javascript:
+
+  $(function() {
+    app = $('#app')[0];
+
+    app.setTerminal(jQuery.parseJSON(app.terminals())[1]);
+    app.setProtocol("T=1");
+
+    app.beginTransaction();
+    
+    r = jQuery.parseJSON(app.load_key([0x55,0x55,0x55,0x55,0x55,0x55],app.KEY_B));
+    r = jQuery.parseJSON(app.auth(0,app.KEY_B));
+    r = jQuery.parseJSON(app.read(0));
+
+    app.endTransaction();
+  });
+
+== Dependencies
+
+* JSON classes (https://github.com/douglascrockford/JSON-java.git)
+* Apache Commons Lang 3 (http://commons.apache.org/lang)
+* Java 1.6
+* PC/SC 2.0 compliant contactless card reader
+
