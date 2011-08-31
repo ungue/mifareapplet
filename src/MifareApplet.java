@@ -98,7 +98,7 @@ public class MifareApplet extends Applet {
    */
   public String write(int nBlock, byte[] val) throws CardException{
     System.out.println("Write");
-    byte[] cmd = new byte[]{(byte)0xff, (byte)0xd6, 0x00, (byte)nBlock};
+    byte[] cmd = new byte[]{(byte)0xff, (byte)0xd6, 0x00, (byte)nBlock, 0x10};
     cmd = ArrayUtils.addAll(cmd, val);
 
     ResponseAPDU r = send(new CommandAPDU(cmd));
