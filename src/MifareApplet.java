@@ -15,6 +15,17 @@ public class MifareApplet extends Applet {
   public static final String PROTOCOL_T1  = "T=1";
   public static final String PROTOCOL_TCL = "T=CL";
 
+  public static final int E_NO_ERROR                 = 0x9000;
+  public static final int E_LENGTH_INCORRECT         = 0x6700;
+  public static final int E_INVALID_INSTRUCTION_BYTE = 0x6D00;
+  public static final int E_CLASS_NOT_SUPPORTED      = 0x6E00;
+  public static final int E_UNKNOWN_COMMAND          = 0x6F00;
+  public static final int E_NO_INFORMATION_GIVEN     = 0x6300;
+  public static final int E_MEMORY_FAILURE           = 0x6581;
+  public static final int E_CLASS_BYTE_INCORRECT     = 0x6800;
+  public static final int E_FUNCTION_NOT_SUPPORTED   = 0x6A81;
+  public static final int E_WRONG_PARAMETER          = 0x6B00;
+
   private Map<Character,Byte> mapKeyType = null;
 
   private String protocol           = PROTOCOL_T1; //T=0, T=1, T=CL
@@ -188,13 +199,13 @@ public class MifareApplet extends Applet {
     JSONObject data = new JSONObject();
 
     try{
-      if(apdu.getSW() == 0x9000) 
+      if(apdu.getSW() == E_NO_ERROR){
         json.put("success", true);
-      else 
+      }else{
         json.put("success", false);
+        json.put("error", apdu.getSW());
+      }
       
-      data.put("SW1",    apdu.getSW1());
-      data.put("SW2",    apdu.getSW2());
       data.put("data",   byteArrayToUnsigned(apdu.getData()));
 
       json.put("apdu", data);
