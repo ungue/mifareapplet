@@ -40,3 +40,17 @@ Here we can see how a card block is readed from a web page by mean of Javascript
 * Java 1.6
 * PC/SC v2.07 or higher compliant contactless card reader
 
+== Troubleshootings
+
+- The card is inserted but the reader seems not to respond.
+  Have you installed the proper drivers? First, launch pcscd in foreground an debug mode to test if all goes fine.
+
+  sudo pcscd -f -d
+
+  For example, to get working SDI010 in Ubuntu 11.04, you'll have to do so:
+  * sudo aptitude install pcscd libpcsclite1 libccid
+  * Download and install the driver from SCM: http://support.scmmicro.com/download_scm/download_scm.php
+
+- No terminal is shown in the applet.
+  May be libpcsclite.so is not found by java. Check for /usr/lib/libpcsclite.so availability.
+

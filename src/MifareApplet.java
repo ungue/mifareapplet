@@ -41,7 +41,7 @@ public class MifareApplet extends Applet {
       for(Iterator<CardTerminal> it = tList.list().iterator(); it.hasNext();){
         l.add(it.next().getName());
       }
-    }catch(CardException e){
+    }catch(Exception e){
       e.printStackTrace();
     }
     JSONArray json = new JSONArray(l);
