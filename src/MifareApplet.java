@@ -1,5 +1,6 @@
 import org.apache.commons.lang3.*;
 import java.util.*;
+import java.io.*;
 import javax.smartcardio.*;
 import java.security.*;
 import org.json.*;
@@ -26,12 +27,20 @@ public class MifareApplet extends Applet {
   public static final int E_FUNCTION_NOT_SUPPORTED   = 0x6A81;
   public static final int E_WRONG_PARAMETER          = 0x6B00;
 
-  private Map<Character,Byte> mapKeyType = null;
+  private Properties properties = null;
+  private boolean isVolatile = true;
+
 
   private String protocol           = PROTOCOL_T1; //T=0, T=1, T=CL
 
   private CardTerminal terminal = null;
   private Card         card     = null;
+
+  private IReader reader = null;
+
+  public void init(){
+    reloadProperties();
+  }
 
   public String terminals() {  
     System.out.println("Lectores");
@@ -51,6 +60,7 @@ public class MifareApplet extends Applet {
 
   public void setTerminal(String terminal){
     this.terminal = TerminalFactory.getDefault().terminals().getTerminal(terminal);
+    loadReader();
   }
 
   public String getTerminal(){
@@ -76,9 +86,12 @@ public class MifareApplet extends Applet {
    * Reads block from terminal
    */
   public String read(int nBlock) throws CardException{
-    System.out.println("Read");
-    byte[] cmd = new byte[]{(byte)0xff, (byte)0xb0, 0x00, (byte)nBlock, 0x00};
-    ResponseAPDU r = send(new CommandAPDU(cmd));
+    System.out.print("Read: ");
+    
+    CommandAPDU apdu = this.reader.read(nBlock);
+    showAPDU(apdu.getBytes());
+    ResponseAPDU r = send(apdu);
+
     return APDUtoJSON(r).toString();
   }
   
@@ -87,10 +100,11 @@ public class MifareApplet extends Applet {
    */
   public String load_key(byte[] key, char keyType) throws CardException{
     System.out.println("Load Key");
-    byte[] cmd = new byte[]{(byte)0xff, (byte)0x82, 0x00, mapKeyType(keyType), 0x06};
-    cmd = ArrayUtils.addAll(cmd,key);
 
-    ResponseAPDU r = send(new CommandAPDU(cmd));
+    CommandAPDU apdu = this.reader.load_key(key, keyType);
+    showAPDU(apdu.getBytes());
+    ResponseAPDU r = send(apdu);
+
     return APDUtoJSON(r).toString();
   }
   
@@ -99,8 +113,11 @@ public class MifareApplet extends Applet {
    */
   public String auth(int nBlock, char keyType) throws CardException{
     System.out.println("Auth");
-    byte[] cmd = new byte[]{(byte)0xff, (byte)0x86, 0x00, 0x00, 0x05, 0x01, 0x00, (byte)nBlock, mapKeyType(keyType), 0x00};
-    ResponseAPDU r = send(new CommandAPDU(cmd));
+    
+    CommandAPDU apdu = this.reader.auth(nBlock, keyType);
+    showAPDU(apdu.getBytes());
+    ResponseAPDU r = send(apdu);
+
     return APDUtoJSON(r).toString();
   }
   
@@ -109,10 +126,11 @@ public class MifareApplet extends Applet {
    */
   public String write(int nBlock, byte[] val) throws CardException{
     System.out.println("Write");
-    byte[] cmd = new byte[]{(byte)0xff, (byte)0xd6, 0x00, (byte)nBlock, 0x10};
-    cmd = ArrayUtils.addAll(cmd, val);
 
-    ResponseAPDU r = send(new CommandAPDU(cmd));
+    CommandAPDU apdu = this.reader.write(nBlock, val);
+    showAPDU(apdu.getBytes());
+    ResponseAPDU r = send(apdu);
+
     return APDUtoJSON(r).toString();
   }
 
@@ -216,19 +234,6 @@ public class MifareApplet extends Applet {
     return json;
   }
 
-  /**
-   * Converts a, b, f to key type values
-   */
-  private byte mapKeyType(char keyType){
-    if(mapKeyType == null){
-      mapKeyType = new Hashtable<Character,Byte>();
-      mapKeyType.put(new Character(KEY_A), new Byte((byte)0x60));
-      mapKeyType.put(new Character(KEY_B), new Byte((byte)0x61));
-      mapKeyType.put(new Character(KEY_F), new Byte((byte)0xFF));
-    }
-
-    return mapKeyType.get(new Character(keyType)).byteValue();
-  }
 
   /**
    * Converts signed byte array to int array (unsigned byte representation)
@@ -242,4 +247,44 @@ public class MifareApplet extends Applet {
 
     return iArray;
   }
+  
+  /**
+   * Reload properties
+   */
+  private void reloadProperties(){
+    try{
+      if(properties == null){
+	properties = new Properties();
+	properties.load(getClass().getResourceAsStream("readers.properties"));
+      }
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Loads IReader from readers.properties
+   */
+  private void loadReader(){
+    System.out.println("Searching in properties " + this.terminal.getName());
+    String strReader = properties.getProperty(this.terminal.getName(), "DefaultReader");
+    System.out.println("Loading " + strReader);
+    try{
+      this.reader = (IReader)getClass().getClassLoader().loadClass(strReader).newInstance();
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Displays APDU
+   */
+  private void showAPDU(byte[] apdu){
+    for(int i=0; i<apdu.length; i++){
+      System.out.print(Integer.toString(0xff & apdu[i], 16));
+      System.out.print(' ');
+    }
+    System.out.println();
+  }
+
 }

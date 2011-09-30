@@ -5,6 +5,7 @@
   <property name="build.dir"          value="build"/>
   <property name="jar.dir"            value="${build.dir}/jar"/>
   <property name="classes.dir"        value="${build.dir}/classes"/>
+  <property name="res.dir"            value="res"/>
   <property name="html.dir"           value="html"/>
   <property name="version.num"        value="1.00"/>
 
@@ -22,8 +23,14 @@
       </classpath>
     </javac>
   </target>
-  
-  <target name="jar" depends="compile">
+
+  <target name="copy.res.files">
+    <copy todir="${classes.dir}">
+      <fileset dir="${res.dir}" />
+    </copy>
+  </target>
+
+  <target name="jar" depends="compile, copy.res.files">
     <buildnumber file="BUILD"/>
 
     <mkdir dir="${jar.dir}"/>
