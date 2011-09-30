@@ -1,7 +1,7 @@
 = Mifare Applet
 
 This applet allow you to use mifare cards from Javascript.
-For now, the applet has been tested with SCM SDI010 card reader.
+For now, the applet has been tested with SCM SDI010 card reader and Omnikey CardMan 5321.
 
 == Functions
 
@@ -38,7 +38,7 @@ Here we can see how a card block is readed from a web page by mean of Javascript
 * JSON classes (https://github.com/douglascrockford/JSON-java.git)
 * Apache Commons Lang 3 (http://commons.apache.org/lang)
 * Java 1.6
-* PC/SC v2.07 or higher compliant contactless card reader
+* PC/SC v2.01 or higher compliant contactless card reader
 
 == Troubleshootings
 
