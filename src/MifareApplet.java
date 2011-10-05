@@ -254,8 +254,8 @@ public class MifareApplet extends Applet {
   private void reloadProperties(){
     try{
       if(properties == null){
-	properties = new Properties();
-	properties.load(getClass().getResourceAsStream("readers.properties"));
+	      properties = new Properties();
+	      properties.load(getClass().getResourceAsStream("readers.properties"));
       }
     }catch(IOException e){
       e.printStackTrace();
@@ -267,7 +267,7 @@ public class MifareApplet extends Applet {
    */
   private void loadReader(){
     System.out.println("Searching in properties " + this.terminal.getName());
-    String strReader = properties.getProperty(this.terminal.getName(), "DefaultReader");
+    String strReader = properties.getProperty(this.terminal.getName().toUpperCase(), "DefaultReader");
     System.out.println("Loading " + strReader);
     try{
       this.reader = (IReader)getClass().getClassLoader().loadClass(strReader).newInstance();
