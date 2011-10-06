@@ -36,6 +36,8 @@ public class MifareApplet extends Applet {
   private CardTerminal terminal = null;
   private Card         card     = null;
 
+  private Exception lastException = null;
+
   private IReader reader = null;
 
   public void init(){
@@ -75,6 +77,13 @@ public class MifareApplet extends Applet {
     this.protocol = protocol;
   }
 
+  public String getLastException(){
+    String res = null;
+    if(lastException != null){
+      res = ExceptionToJSON(lastException).toString();
+    }
+    return res;
+  }
 
   /**************************************************************************
    *
@@ -85,53 +94,90 @@ public class MifareApplet extends Applet {
   /**
    * Reads block from terminal
    */
-  public String read(int nBlock) throws CardException{
-    System.out.print("Read: ");
-    
-    CommandAPDU apdu = this.reader.read(nBlock);
-    showAPDU(apdu.getBytes());
-    ResponseAPDU r = send(apdu);
+  public String read(int nBlock){
+    String res = null;
 
-    return APDUtoJSON(r).toString();
+    try{
+      cleanLastException();
+      System.out.print("Read: ");
+    
+      CommandAPDU apdu = this.reader.read(nBlock);
+      showAPDU(apdu.getBytes());
+      ResponseAPDU r = send(apdu);
+
+      res = APDUtoJSON(r).toString();
+
+    }catch(Exception e){
+      this.lastException = e;
+    }finally{
+      return res;
+    }
   }
   
   /**
    * Load key
    */
-  public String load_key(byte[] key, char keyType) throws CardException{
-    System.out.println("Load Key");
+  public String load_key(byte[] key, char keyType){
+    String res = null;
+    
+    try{
+      cleanLastException();
+      System.out.println("Load Key");
 
-    CommandAPDU apdu = this.reader.load_key(key, keyType);
-    showAPDU(apdu.getBytes());
-    ResponseAPDU r = send(apdu);
+      CommandAPDU apdu = this.reader.load_key(key, keyType);
+      showAPDU(apdu.getBytes());
+      ResponseAPDU r = send(apdu);
 
-    return APDUtoJSON(r).toString();
+      res = APDUtoJSON(r).toString();
+    }catch(Exception e){
+      this.lastException = e;
+    }finally{
+      return res;
+    }
   }
   
   /**
    * Auth
    */
-  public String auth(int nBlock, char keyType) throws CardException{
-    System.out.println("Auth");
-    
-    CommandAPDU apdu = this.reader.auth(nBlock, keyType);
-    showAPDU(apdu.getBytes());
-    ResponseAPDU r = send(apdu);
+  public String auth(int nBlock, char keyType){
+    String res = null;
 
-    return APDUtoJSON(r).toString();
+    try{
+      cleanLastException();
+      System.out.println("Auth");
+      
+      CommandAPDU apdu = this.reader.auth(nBlock, keyType);
+      showAPDU(apdu.getBytes());
+      ResponseAPDU r = send(apdu);
+
+      res = APDUtoJSON(r).toString();
+    }catch(Exception e){
+      this.lastException = e;
+    }finally{
+      return res;
+    }
   }
   
   /**
    * Writes
    */
-  public String write(int nBlock, byte[] val) throws CardException{
-    System.out.println("Write");
+  public String write(int nBlock, byte[] val){
+    String res = null;
 
-    CommandAPDU apdu = this.reader.write(nBlock, val);
-    showAPDU(apdu.getBytes());
-    ResponseAPDU r = send(apdu);
+    try{
+      cleanLastException();
+      System.out.println("Write");
 
-    return APDUtoJSON(r).toString();
+      CommandAPDU apdu = this.reader.write(nBlock, val);
+      showAPDU(apdu.getBytes());
+      ResponseAPDU r = send(apdu);
+
+      res = APDUtoJSON(r).toString();
+    }catch(Exception e){
+      this.lastException = e;
+    }finally{
+      return res;
+    }
   }
 
   /**********************************************************************************
@@ -140,13 +186,14 @@ public class MifareApplet extends Applet {
    *
    * ********************************************************************************/
 
-  public void beginTransaction() throws CardException{
+  public void beginTransaction(){
     try{
+      cleanLastException();
       AccessController.doPrivileged(
         new PrivilegedExceptionAction<Object>(){
           public Object run() throws CardException{
             try{
-              card    = terminal.connect(protocol);
+              card = terminal.connect(protocol);
               return null;
             }catch(CardException e){
               throw e;
@@ -156,12 +203,13 @@ public class MifareApplet extends Applet {
       );
     }catch(PrivilegedActionException e){
       e.printStackTrace();
-      throw (CardException)e.getException();
+      this.lastException = e.getException();
     }
   }
 
   public void endTransaction(){
     try{
+      cleanLastException();
       AccessController.doPrivileged(
         new PrivilegedExceptionAction<Object>(){
           public Object run() throws CardException{
@@ -234,6 +282,25 @@ public class MifareApplet extends Applet {
     return json;
   }
 
+  /**
+   * Serializes an Exception to JSON
+   */
+  private JSONObject ExceptionToJSON(Exception exc){
+    JSONObject json = new JSONObject();
+
+    try{
+      json.put("type", exc.getClass().getName());
+      json.put("message", exc.getMessage());
+    }catch(JSONException e){
+      e.printStackTrace();
+    }
+
+    return json;
+  }
+
+  private void cleanLastException(){
+    this.lastException = null;
+  }
 
   /**
    * Converts signed byte array to int array (unsigned byte representation)
