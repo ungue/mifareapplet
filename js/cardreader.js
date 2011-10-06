@@ -20,8 +20,8 @@ CardReaderException = function(err_type){
   };
 
   return {
-    name    : 'CardReaderException',
-    message : errTypeToMsg(err_type)
+    name    : (err_type && err_type.type) ? err_type.type : 'CardReaderException',
+    message : (err_type && err_type.message) ? err_type.message : errTypeToMsg(err_type)
   }
 }
 
@@ -39,7 +39,19 @@ CardReader = function(){
   var protocol = null;
 
   throw_exception_if_error = function(r){
-    if(!r.success) throw new CardReaderException(r.error);
+    exc = null;
+
+    if(r == null){
+      error = applet.getLastException();
+      if(error) exc = new CardReaderException(jQuery.parseJSON(error));
+    }else if(!r.success){
+      exc = new CardReaderException(r.error);
+    }
+
+    if(exc){
+      console.debug(exc);
+      throw exc;
+    }
     return r;
   };
 
@@ -87,7 +99,7 @@ CardReader = function(){
         applet.setTerminal(reader);
         applet.setProtocol(protocol);
             
-        applet.beginTransaction();
+        throw_exception_if_error(applet.beginTransaction());
 
         // Read blocks and load card
         $.each(keys, function(num_sector, k){
@@ -113,7 +125,7 @@ CardReader = function(){
         applet.setTerminal(reader);
         applet.setProtocol(protocol);
 
-        applet.beginTransaction();
+        throw_exception_if_error(applet.beginTransaction());
 
         $.each(keys, function(num_sector, k){
           if(num_sector > 0){ // Jumping over 0 sector
