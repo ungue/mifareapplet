@@ -1,5 +1,6 @@
 # Ignore custom config
 build.xml
+res/config.properties
 
 # Ignore binaries
 lib/

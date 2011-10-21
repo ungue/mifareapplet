@@ -44,11 +44,9 @@ public class MifareApplet extends Applet {
   public void init(){
     reloadReadersProperties();
     reloadConfigProperties();
-    loadConfig();
   }
 
   public String terminals() {  
-    System.out.println("Terminals");
     List<String> l = new ArrayList<String>();
     try {
       CardTerminals tList = TerminalFactory.getDefault().terminals();
@@ -354,6 +352,9 @@ public class MifareApplet extends Applet {
       if(configProperties == null){
 	      configProperties = new Properties();
 	      configProperties.load(getClass().getResourceAsStream("config.properties"));
+
+        // Instantiates all needed classes
+        loadConfig();
       }
     }catch(IOException e){
       e.printStackTrace();
