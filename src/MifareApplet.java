@@ -27,9 +27,9 @@ public class MifareApplet extends Applet {
   public static final int E_FUNCTION_NOT_SUPPORTED   = 0x6A81;
   public static final int E_WRONG_PARAMETER          = 0x6B00;
 
-  private Properties properties = null;
+  private Properties readersProperties = null;
+  private Properties configProperties = null;
   private boolean isVolatile = true;
-
 
   private String protocol           = PROTOCOL_T1; //T=0, T=1, T=CL
 
@@ -39,13 +39,16 @@ public class MifareApplet extends Applet {
   private Exception lastException = null;
 
   private IReader reader = null;
+  private IDecoder decoder = null;
 
   public void init(){
-    reloadProperties();
+    reloadReadersProperties();
+    reloadConfigProperties();
+    loadConfig();
   }
 
   public String terminals() {  
-    System.out.println("Lectores");
+    System.out.println("Terminals");
     List<String> l = new ArrayList<String>();
     try {
       CardTerminals tList = TerminalFactory.getDefault().terminals();
@@ -79,8 +82,8 @@ public class MifareApplet extends Applet {
 
   public String getLastException(){
     String res = null;
-    if(lastException != null){
-      res = ExceptionToJSON(lastException).toString();
+    if(this.lastException != null){
+      res = ExceptionToJSON(this.lastException).toString();
     }
     return res;
   }
@@ -124,7 +127,7 @@ public class MifareApplet extends Applet {
       cleanLastException();
       System.out.println("Load Key");
 
-      CommandAPDU apdu = this.reader.load_key(key, keyType);
+      CommandAPDU apdu = this.reader.load_key(this.decoder.decode(key), keyType);
       showAPDU(apdu.getBytes());
       ResponseAPDU r = send(apdu);
 
@@ -316,13 +319,13 @@ public class MifareApplet extends Applet {
   }
   
   /**
-   * Reload properties
+   * Reload readers properties
    */
-  private void reloadProperties(){
+  private void reloadReadersProperties(){
     try{
-      if(properties == null){
-	      properties = new Properties();
-	      properties.load(getClass().getResourceAsStream("readers.properties"));
+      if(readersProperties == null){
+	      readersProperties = new Properties();
+	      readersProperties.load(getClass().getResourceAsStream("readers.properties"));
       }
     }catch(IOException e){
       e.printStackTrace();
@@ -334,10 +337,37 @@ public class MifareApplet extends Applet {
    */
   private void loadReader(){
     System.out.println("Searching in properties " + this.terminal.getName());
-    String strReader = properties.getProperty(this.terminal.getName().toUpperCase(), "DefaultReader");
+    String strReader = readersProperties.getProperty(this.terminal.getName().toUpperCase(), "DefaultReader");
     System.out.println("Loading " + strReader);
     try{
       this.reader = (IReader)getClass().getClassLoader().loadClass(strReader).newInstance();
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Reload config properties
+   */
+  private void reloadConfigProperties(){
+    try{
+      if(configProperties == null){
+	      configProperties = new Properties();
+	      configProperties.load(getClass().getResourceAsStream("config.properties"));
+      }
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+  }
+  
+  /**
+   * Loads Config from config.properties
+   */
+  private void loadConfig(){
+    String strDecoder = configProperties.getProperty("mifareapplet.keys.decoder", "NullDecoder");
+
+    try{
+      this.decoder = (IDecoder)getClass().getClassLoader().loadClass(strDecoder).newInstance();
     }catch(Exception e){
       e.printStackTrace();
     }

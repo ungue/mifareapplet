@@ -14,6 +14,46 @@ It only has six simple autoexplanatory functions:
 * beginTransaction
 * endTransaction
 
+=== load_key and key encryption (for developers only)
+
+May be you need to get keys from a key store which gives you them encrypted. Well, load_key allows these ones to be decrypted internally to prevent anyone can get their real values.
+The use of this capability is simple. You need to implement your own class which implements IDecoder and set the name of this class into config.properties. Let see an example:
+  
+  import javax.crypto.*;
+  import javax.crypto.spec.*;
+
+  class DESDecoder implements IDecoder {
+
+    private byte[] key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 }; // Hardcoded DES key 8 bytes
+
+    private Cipher cipher;
+    private SecretKey secretKey;
+
+    public DESDecoder(){
+      System.out.println("DES/ECB/PKCS5Padding Decoder loaded");
+
+      try{
+        cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+        secretKey = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(key));
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+    }
+
+    public byte[] decode(byte[] bytes){
+      try{
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        return cipher.doFinal(bytes);
+      }catch(Exception e){
+        e.printStackTrace();
+        return null;
+      }
+    }
+  }
+
+The file config.properties has to contain the following line:
+  mifareapplet.keys.decoder = DESDecoder
+
 == Example of use
 
 Here we can see how a card block is readed from a web page by mean of Javascript:
