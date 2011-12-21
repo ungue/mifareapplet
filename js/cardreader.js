@@ -120,6 +120,28 @@ CardReader = function(){
       }
     },
 
+    readBlock : function(numBlock, key_type){
+      try{
+        applet.setTerminal(reader);
+        applet.setProtocol(protocol);
+            
+        throw_exception_if_error(applet.beginTransaction());
+
+        // Read block
+        var num_sector = ~~(numBlock / 4);
+        throw_exception_if_error(jQuery.parseJSON(applet.load_key(keys[num_sector], key_type.charCodeAt(0))));
+        throw_exception_if_error(jQuery.parseJSON(applet.auth(numBlock, key_type.charCodeAt(0))));
+        r = throw_exception_if_error(jQuery.parseJSON(applet.read(numBlock)));
+
+        return r.apdu.data;
+        
+      }catch(err){
+        throw err;
+      }finally{
+        applet.endTransaction();
+      }
+    },
+
     write : function(key_type){
       try{
         applet.setTerminal(reader);
@@ -132,6 +154,31 @@ CardReader = function(){
             // Excludes access conditions blocks too
             for(var numBlock = 0; numBlock < 3; numBlock++){
               var n = (num_sector * 4) + numBlock;
+              throw_exception_if_error(jQuery.parseJSON(applet.load_key(k, key_type.charCodeAt(0))));
+              throw_exception_if_error(jQuery.parseJSON(applet.auth(n, key_type.charCodeAt(0))));
+              throw_exception_if_error(jQuery.parseJSON(applet.write(n, card[n])));
+              console.debug('Block:' + n);
+            }
+          }
+        });
+      }catch(err){
+        throw err;
+      }finally{
+        applet.endTransaction();
+      }
+    },
+
+    writeFull : function(key_type){
+      try{
+        applet.setTerminal(reader);
+        applet.setProtocol(protocol);
+
+        throw_exception_if_error(applet.beginTransaction());
+
+        $.each(keys, function(num_sector, k){
+          for(var numBlock = 0; numBlock < 4; numBlock++){
+            var n = (num_sector * 4) + numBlock;
+            if(n > 0){ // Jump over manufacturer block
               throw_exception_if_error(jQuery.parseJSON(applet.load_key(k, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.auth(n, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.write(n, card[n])));
