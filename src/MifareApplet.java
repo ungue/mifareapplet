@@ -44,6 +44,8 @@ public class MifareApplet extends Applet {
   public void init(){
     reloadReadersProperties();
     reloadConfigProperties();
+    
+    initFromParameters();
   }
 
   public String terminals() {  
@@ -372,6 +374,17 @@ public class MifareApplet extends Applet {
     }catch(Exception e){
       e.printStackTrace();
     }
+  }
+
+  /**
+   * Loads parameters terminal and protocol to initialize them into accessors 
+   */
+  private void initFromParameters(){
+    String terminal = this.getParameter("terminal");
+    String protocol = this.getParameter("protocol");
+
+    if (terminal != null) this.setTerminal(terminal);
+    if (protocol != null) this.setProtocol(protocol);
   }
 
   /**

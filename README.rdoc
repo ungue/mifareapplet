@@ -3,6 +3,15 @@
 This applet allow you to use mifare cards from Javascript.
 For now, the applet has been tested with SCM SDI010 card reader and Omnikey CardMan 5321.
 
+== Parameters
+
+The following parameters are allowed:
+
+* terminal
+* protocol
+
+These two avoid you have to call setTerminal and setProtocol in javascript.
+
 == Functions
 
 It only has six simple autoexplanatory functions:
@@ -75,7 +84,7 @@ Here we can see how a card block is readed from a web page by mean of Javascript
 
 == Dependencies
 
-* JSON classes (https://github.com/douglascrockford/JSON-java.git)
+* JSON classes (https://github.com/douglascrockford/JSON-java)
 * Apache Commons Lang 3 (http://commons.apache.org/lang)
 * Java 1.6
 * PC/SC v2.01 or higher compliant contactless card reader
