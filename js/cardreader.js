@@ -202,7 +202,7 @@ CardReader = function(){
     // ]
     loadCardFromURL : function(url, success){
       var scope = this;
-      $.getJSON(url, function(data){
+      return $.getJSON(url, function(data){
         scope.setCard(data);
         success.call(this);
       });
@@ -217,7 +217,7 @@ CardReader = function(){
     // ]
     loadKeysFromURL : function(url, success){
       var scope = this;
-      $.getJSON(url, function(data){
+      return $.getJSON(url, function(data){
         scope.setKeys(data);
         success.call(this);
       });
