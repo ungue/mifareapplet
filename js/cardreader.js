@@ -178,7 +178,7 @@ CardReader = function(){
         $.each(keys, function(num_sector, k){
           for(var numBlock = 0; numBlock < 4; numBlock++){
             var n = (num_sector * 4) + numBlock;
-            if(n > 0){ // Jump over manufacturer block
+            if(n > 1){ // Jump over manufacturer block 0 and 1
               throw_exception_if_error(jQuery.parseJSON(applet.load_key(k, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.auth(n, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.write(n, card[n])));
