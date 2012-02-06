@@ -16,6 +16,11 @@ public class MifareApplet extends Applet {
   public static final String PROTOCOL_T1  = "T=1";
   public static final String PROTOCOL_TCL = "T=CL";
 
+  public static final String JSON_KEY_SUCCESS = "success";
+  public static final String JSON_KEY_DATA    = "data";
+  public static final String JSON_KEY_ERROR   = "error";
+  public static final String JSON_KEY_APDU    = "apdu";
+
   public static final int E_NO_ERROR                 = 0x9000;
   public static final int E_LENGTH_INCORRECT         = 0x6700;
   public static final int E_INVALID_INSTRUCTION_BYTE = 0x6D00;
@@ -285,15 +290,15 @@ public class MifareApplet extends Applet {
 
     try{
       if(apdu.getSW() == E_NO_ERROR){
-        json.put("success", true);
+        json.put(JSON_KEY_SUCCESS, true);
       }else{
-        json.put("success", false);
-        json.put("error", apdu.getSW());
+        json.put(JSON_KEY_SUCCESS, false);
+        json.put(JSON_KEY_ERROR, apdu.getSW());
       }
       
-      data.put("data",   byteArrayToUnsigned(apdu.getData()));
+      data.put(JSON_KEY_DATA, byteArrayToUnsigned(apdu.getData()));
 
-      json.put("apdu", data);
+      json.put(JSON_KEY_APDU, data);
     }catch(JSONException e){
       e.printStackTrace();
     }
