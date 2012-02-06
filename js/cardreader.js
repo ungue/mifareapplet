@@ -93,6 +93,11 @@ CardReader = function(){
       keys = ks;
     },
 
+    isCardPresent : function(){
+      applet.setTerminal(reader);
+      return applet.isCardPresent();
+    },
+
     read : function(key_type){
       card = []; // Clean card
       try{

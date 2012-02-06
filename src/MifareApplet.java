@@ -95,6 +95,22 @@ public class MifareApplet extends Applet {
    **************************************************************************/
 
   /**
+   * Checks if a card is present on terminal
+   */  
+  public boolean isCardPresent(){
+    boolean present = false;
+
+    try{
+      present = this.terminal.isCardPresent();
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+
+    System.out.println("Card present?:" + (present ? "YES" : "NO"));
+    return present;
+  }
+
+  /**
    * Reads block from terminal
    */
   public String read(int nBlock){
