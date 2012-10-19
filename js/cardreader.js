@@ -49,7 +49,6 @@ CardReader = function(){
     }
 
     if(exc){
-      console.debug(exc);
       throw exc;
     }
     return r;
@@ -162,7 +161,6 @@ CardReader = function(){
               throw_exception_if_error(jQuery.parseJSON(applet.load_key(k, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.auth(n, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.write(n, card[n])));
-              console.debug('Block:' + n);
             }
           }
         });
@@ -187,7 +185,6 @@ CardReader = function(){
               throw_exception_if_error(jQuery.parseJSON(applet.load_key(k, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.auth(n, key_type.charCodeAt(0))));
               throw_exception_if_error(jQuery.parseJSON(applet.write(n, card[n])));
-              console.debug('Block:' + n);
             }
           }
         });
